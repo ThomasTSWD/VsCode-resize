@@ -108,10 +108,13 @@ async function resizeImage(filePath, requestedSize) {
 		.resize({ width: requestedSize, height: requestedSize, fit: "inside" })
 		.toBuffer();
 
-	const outputPath = filePath.replace(
-		/\.(png|jpg|jpeg)$/,
-		`_resized_${requestedSize}x${requestedSize}.$1`
-	);
+	const resizedFileName = path
+		.basename(filePath)
+		.replace(
+			/\.(png|jpg|jpeg)$/,
+			`_resized_${requestedSize}x${requestedSize}.$1`
+		);
+	const outputPath = path.join(path.dirname(filePath), resizedFileName);
 
 	await fs.promises.writeFile(outputPath, resizedImageBuffer);
 
