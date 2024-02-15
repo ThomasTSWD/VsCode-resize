@@ -91,16 +91,26 @@ function activate(context) {
 	context.subscriptions.push(disposable);
 }
 
-async function resizeImage(filePath, size) {
+async function resizeImage(filePath, requestedSize) {
 	const imageBuffer = await fs.promises.readFile(filePath);
+	const imageMetadata = await sharp(imageBuffer).metadata();
+
+	// Vérifier si la taille demandée est supérieure à la taille de l'image
+	const maxSize = Math.max(imageMetadata.width, imageMetadata.height);
+	if (requestedSize > maxSize) {
+		vscode.window.showWarningMessage(
+			`La taille demandée est supérieure à la taille maximale de l'image. L'image ne sera pas redimensionnée.`
+		);
+		return;
+	}
 
 	const resizedImageBuffer = await sharp(imageBuffer)
-		.resize({ width: size, height: size, fit: "inside" })
+		.resize({ width: requestedSize, height: requestedSize, fit: "inside" })
 		.toBuffer();
 
 	const outputPath = filePath.replace(
 		/\.(png|jpg|jpeg)$/,
-		`_resized_${size}x${size}.$1`
+		`_resized_${requestedSize}x${requestedSize}.$1`
 	);
 
 	await fs.promises.writeFile(outputPath, resizedImageBuffer);
