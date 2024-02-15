@@ -30,7 +30,7 @@
         }
     },
     
-    "author": "TSWD",
+    "publisher": "TSWD",
     "repository": {
         "type": "git",
         "url": "https://github.com/ThomasTSWD/code-resize.git"
