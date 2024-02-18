@@ -63,9 +63,20 @@ function activate(context) {
 							// Si c'est un dossier, redimensionnez toutes les images à l'intérieur
 							const files = await fs.promises.readdir(filePath);
 							const imageFiles = files.filter((fileName) =>
-								[".png", ".jpg", ".jpeg"].includes(
-									path.extname(fileName).toLowerCase()
-								)
+								[
+									".png",
+									".jpg",
+									".jpeg",
+									".webp",
+									".tiff",
+									".heic",
+									".PNG",
+									".JPG",
+									".JPEG",
+									".WEBP",
+									".TIFF",
+									".HEIC",
+								].includes(path.extname(fileName).toLowerCase())
 							);
 
 							await Promise.all(
@@ -92,39 +103,76 @@ function activate(context) {
 }
 
 async function resizeImage(filePath, requestedSize) {
-	const imageBuffer = await fs.promises.readFile(filePath);
-	const imageMetadata = await sharp(imageBuffer).metadata();
-
-	// Vérifier si la taille demandée est supérieure à la taille de l'image
-	const maxSize = Math.max(imageMetadata.width, imageMetadata.height);
-	if (requestedSize > maxSize) {
+	const extname = path.extname(filePath).toLowerCase();
+	if (
+		![
+			".png",
+			".jpg",
+			".jpeg",
+			".webp",
+			".tiff",
+			".heic",
+			".PNG",
+			".JPG",
+			".JPEG",
+			".WEBP",
+			".TIFF",
+			".HEIC",
+		].includes(extname)
+	) {
 		vscode.window.showWarningMessage(
-			`La taille demandée est supérieure à la taille maximale de l'image. L'image ne sera pas redimensionnée.`
+			`Le fichier ${path.basename(
+				filePath
+			)} n'est pas une image valide (.png, .jpg, .jpeg). Il ne sera pas redimensionné.`
 		);
 		return;
 	}
 
-	const resizedImageBuffer = await sharp(imageBuffer)
-		.resize({ width: requestedSize, height: requestedSize, fit: "inside" })
-		.toBuffer();
+	try {
+		const imageBuffer = await fs.promises.readFile(filePath);
+		const imageMetadata = await sharp(imageBuffer).metadata();
 
-	const resizedFileName = path
-		.basename(filePath)
-		.replace(
-			/\.(png|jpg|jpeg)$/,
-			`_resized_${requestedSize}x${requestedSize}.$1`
+		// Vérifier si la taille demandée est supérieure à la taille de l'image
+		const maxSize = Math.max(imageMetadata.width, imageMetadata.height);
+		if (requestedSize > maxSize) {
+			vscode.window.showWarningMessage(
+				`La taille demandée est supérieure à la taille maximale de l'image. L'image ne sera pas redimensionnée.`
+			);
+			return;
+		}
+
+		const resizedImageBuffer = await sharp(imageBuffer)
+			.resize({
+				width: requestedSize,
+				height: requestedSize,
+				fit: "inside",
+			})
+			.toBuffer();
+
+		const resizedFileName = path
+			.basename(filePath)
+			.replace(
+				/\.(png|jpg|jpeg|webp|tiff|heic|PNG|JPG|JPEG|WEBP|TIFF|HEIC)$/,
+				`_resized_${requestedSize}x${requestedSize}.$1`
+			);
+		const outputPath = path.join(path.dirname(filePath), resizedFileName);
+
+		await fs.promises.writeFile(outputPath, resizedImageBuffer);
+
+		vscode.window.showInformationMessage(
+			`L'image ${path.basename(
+				filePath
+			)} a été redimensionnée et enregistrée sous ${path.basename(
+				outputPath
+			)}`
 		);
-	const outputPath = path.join(path.dirname(filePath), resizedFileName);
-
-	await fs.promises.writeFile(outputPath, resizedImageBuffer);
-
-	vscode.window.showInformationMessage(
-		`L'image ${path.basename(
-			filePath
-		)} a été redimensionnée et enregistrée sous ${path.basename(
-			outputPath
-		)}`
-	);
+	} catch (error) {
+		vscode.window.showErrorMessage(
+			`Une erreur s'est produite lors du redimensionnement de l'image ${path.basename(
+				filePath
+			)} : ${error}`
+		);
+	}
 }
 
 function deactivate() {

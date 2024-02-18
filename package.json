@@ -30,12 +30,12 @@
         }
     },
     
-    "publisher": "TSWD",
+    "publisher": "ThomasTSWD",
     "repository": {
         "type": "git",
         "url": "https://github.com/ThomasTSWD/code-resize.git"
     },
-    "icon": "274935.png",
+    "icon": "icon.png",
     "devDependencies": {
         "@types/vscode": "^1.61.0"
     },
