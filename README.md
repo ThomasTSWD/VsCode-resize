@@ -11,7 +11,7 @@
 
 ## Utilisation
 
-### Redimensionner une seule image
+### Redimensionner une seule image 
 
 1. Sélectionnez l'image à redimensionner dans l'explorateur de fichiers.
 2. Faites un clic droit sur l'image.
