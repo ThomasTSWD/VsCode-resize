@@ -1,3 +1,5 @@
+(le package via github actions fonctionne pas car la bibli sharp est pas compatible mac / pc il faut vsce pakage en local)
+
 # VS Code Image Resizer 🍦   
 
 **VS Code Image Resizer** est une extension pour Visual Studio Code qui vous permet de redimensionner rapidement des images directement depuis l'éditeur de code.
